@@ -1,13 +1,15 @@
 const request = require('request');
-require('dotenv').config()
+require('dotenv').config();
 const sendSms = require('./_helper');
 
 let attempt = 1;
-const pincodes = [ '110092', '110093', '110094', '110095' ]
-const dateToVerify = '16-05-2021'
+const pincodes = [ '110092', '110093', '110094', '110095' ];
+const dateToVerify = '16-05-2021';
+const age = 18;
+const feeType = 'Free';
+const vaccineType = "COVISHIELD";
 
 function getCovidShieldAvailability(pincode) {
-    // console.log('Start Fetching Auth');
     return new Promise((resolve) => {
         try {
             console.log('-----------------------------------------------------------------------------------------')
@@ -44,12 +46,7 @@ pincodes.forEach((pincode)=> {
             setInterval(function(){
                 getCovidShieldAvailability(pincode).then(result => {
                     if(result.success) {
-                        // console.log("COVID RESPONSE")
-                        // console.log(result)
                         isCOVIDSHIELDAvailable(result, pincode);
-                    } else {
-                        // console.log("COVID Error")
-                        // console.log(result.error)
                     }
                 });
             }, (10000));
@@ -59,9 +56,6 @@ pincodes.forEach((pincode)=> {
                 getCovidShieldAvailability(pincode).then(result => {
                     if(result.success) {
                         isCOVIDSHIELDAvailable(result, pincode);
-                    } else {
-                        // console.log("COVID Error")
-                        // console.log(result.error)
                     }
                 });
             }, (10000));
@@ -71,11 +65,10 @@ pincodes.forEach((pincode)=> {
 })
 
 function isCOVIDSHIELDAvailable(result, pincode) {
-    // console.log('Send SMS')
     result.responseData.centers.forEach((center)=>{
         center.sessions.forEach((session)=>{
-            if(session.vaccine === 'COVISHIELD' && center.fee_type === 'Free') {
-                if(+session.available_capacity && +session.min_age_limit === 18) {
+            if(session.vaccine === vaccineType && center.fee_type === feeType) {
+                if(+session.available_capacity && +session.min_age_limit === age) {
                     sendSMSCall(pincode);
                     console.log(session.vaccine, +session.available_capacity, +session.min_age_limit)
                     const message = pincode + ' - COVISHIELD is now Available @ ' + center.name + '. Address: '+ center.address + ' Remaining vaccine: ' + session.available_capacity + ' on ' + session.date + ' for age group '+ session.min_age_limit;
@@ -83,8 +76,6 @@ function isCOVIDSHIELDAvailable(result, pincode) {
                     console.log(message);
                     console.log('###############################################################');
 
-                } else {
-                    // console.log('COVISHIELD Not Available @ pincode ' + pincode + ' For 18+.')
                 }
             }
 

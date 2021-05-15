@@ -17,7 +17,7 @@
 
 Note:
 
-Change the pincode and date in each function and get a call with picode on your mobile phone once the slot is available.
+Change the pincode and date in server.js file and get a call with picode on your mobile phone once the slot is available.
 // Also get the complete message on console.
 
 Change the age accordingly on server.js file inside function isCOVIDSHIELDAvailable.
