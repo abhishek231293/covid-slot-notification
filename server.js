@@ -3,7 +3,7 @@ require('dotenv').config();
 const sendSms = require('./_helper');
 
 let attempt = 1;
-const pincodes = [ '110092', '110093', '110094', '110095' ];
+const pincodes = [ '110092', '110093', '110094', '110095', '110096' ];
 const dateToVerify = '16-05-2021';
 const age = 18;
 const feeType = 'Free';
@@ -68,14 +68,13 @@ function isCOVIDSHIELDAvailable(result, pincode) {
     result.responseData.centers.forEach((center)=>{
         center.sessions.forEach((session)=>{
             if(session.vaccine === vaccineType && center.fee_type === feeType) {
-                if(+session.available_capacity && +session.min_age_limit === age) {
+                if(+session.available_capacity_dose1 && +session.min_age_limit === age) {
                     sendSMSCall(pincode);
-                    console.log(session.vaccine, +session.available_capacity, +session.min_age_limit)
+                    console.log(session.vaccine, +session.available_capacity_dose1, +session.min_age_limit)
                     const message = pincode + ' - COVISHIELD is now Available @ ' + center.name + '. Address: '+ center.address + ' Remaining vaccine: ' + session.available_capacity + ' on ' + session.date + ' for age group '+ session.min_age_limit;
                     console.log('###############################################################');
                     console.log(message);
                     console.log('###############################################################');
-
                 }
             }
 
@@ -85,6 +84,7 @@ function isCOVIDSHIELDAvailable(result, pincode) {
 }
 
 function sendSMSCall(pincode) {
+
     const sendSmsData = {
         mobileNumber: process.env.NOTIFICATION_TO,
         otp: pincode
