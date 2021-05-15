@@ -3,19 +3,20 @@ require('dotenv').config()
 const sendSms = require('./_helper');
 
 let attempt = 1;
+const pincodes = [ '110092', '110093', '110094', '110095' ]
+const dateToVerify = '16-05-2021'
 
-//-------------------Functions To fetch list-------------------------------
-//110093
-function getCovidShieldAvailability4() {
+function getCovidShieldAvailability(pincode) {
     // console.log('Start Fetching Auth');
     return new Promise((resolve) => {
         try {
-            console.log("COVID Vaccine Availability Check Attempt: " + attempt + " for pincode 110093 (18+ only)")
+            console.log('-----------------------------------------------------------------------------------------')
+            console.log("COVID Vaccine Availability Check Attempt: " + attempt + " for pincode "+ pincode +" (18+ only)")
             console.log('-----------------------------------------------------------------------------------------')
 
             attempt = attempt + 1;
             request.get({
-                url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByPin?pincode=110093&date=16-05-2021'
+                url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByPin?pincode='+pincode+'&date=' + dateToVerify
             }, function (err, httpResponse, body) {
 
                 if(body){
@@ -35,229 +36,39 @@ function getCovidShieldAvailability4() {
 
 }
 
-//110092
-function getCovidShieldAvailability() {
-    // console.log('Start Fetching Auth');
-    return new Promise((resolve) => {
-        try {
-            console.log('-----------------------------------------------------------------------------------------')
-            console.log("COVID Vaccine Availability Check Attempt: " + attempt + " for pincode 110092 (18+ only)")
-            console.log('-----------------------------------------------------------------------------------------')
-
-            attempt = attempt + 1;
-            request.get({
-                url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByPin?pincode=110092&date=16-05-2021'
-            }, function (err, httpResponse, body) {
-
-                if(body){
-                    try {
-                        const responseData = JSON.parse(body);
-                        resolve({success: true, msg: "", responseData });
-                    } catch (e) {
-                        resolve({success: false, msg: "", error: e});
+pincodes.forEach((pincode)=> {
+    getCovidShieldAvailability(pincode).then(result => {
+        if(result.success) {
+            isCOVIDSHIELDAvailable(result, pincode);
+    
+            setInterval(function(){
+                getCovidShieldAvailability(pincode).then(result => {
+                    if(result.success) {
+                        // console.log("COVID RESPONSE")
+                        // console.log(result)
+                        isCOVIDSHIELDAvailable(result, pincode);
+                    } else {
+                        // console.log("COVID Error")
+                        // console.log(result.error)
                     }
-                }
-            });
-        } catch (e) {
-            resolve({success: false, msg: "", error: e});
-        }
-
-    });
-
-}
-
-//110094
-function getCovidShieldAvailability3() {
-    // console.log('Start Fetching Auth');
-    return new Promise((resolve) => {
-        try {
-            console.log("COVID Vaccine Availability Check Attempt: " + attempt + " for pincode 110096 (18+ only)")
-            console.log('-----------------------------------------------------------------------------------------')
-
-            attempt = attempt + 1;
-            request.get({
-                url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByPin?pincode=110096&date=16-05-2021'
-            }, function (err, httpResponse, body) {
-
-                if(body){
-                    try {
-                        const responseData = JSON.parse(body);
-                        resolve({success: true, msg: "", responseData });
-                    } catch (e) {
-                        resolve({success: false, msg: "", error: e});
+                });
+            }, (10000));
+    
+        } else {
+            setInterval(function() {
+                getCovidShieldAvailability(pincode).then(result => {
+                    if(result.success) {
+                        isCOVIDSHIELDAvailable(result, pincode);
+                    } else {
+                        // console.log("COVID Error")
+                        // console.log(result.error)
                     }
-                }
-            });
-        } catch (e) {
-            resolve({success: false, msg: "", error: e});
+                });
+            }, (10000));
         }
-
+    
     });
-
-}
-
-//110095
-function getCovidShieldAvailability1() {
-    // console.log('Start Fetching Auth');
-    return new Promise((resolve) => {
-        try {
-            console.log("COVID Vaccine Availability Check Attempt: " + attempt + " for pincode 110095 (18+ only)")
-            console.log('-----------------------------------------------------------------------------------------')
-
-            attempt = attempt + 1;
-            request.get({
-                url: 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByPin?pincode=110095&date=16-05-2021'
-            }, function (err, httpResponse, body) {
-
-                if(body){
-                    try {
-                        const responseData = JSON.parse(body);
-                        resolve({success: true, msg: "", responseData });
-                    } catch (e) {
-                        resolve({success: false, msg: "", error: e});
-                    }
-                }
-            });
-        } catch (e) {
-            resolve({success: false, msg: "", error: e});
-        }
-
-    });
-
-}
-
-//------------------------------Function call with interval-----------------------------------
-
-//110092
-getCovidShieldAvailability().then(result => {
-    if(result.success) {
-        isCOVIDSHIELDAvailable(result, '110092');
-
-        setInterval(function(){
-            getCovidShieldAvailability().then(result => {
-                if(result.success) {
-                    // console.log("COVID RESPONSE")
-                    // console.log(result)
-                    isCOVIDSHIELDAvailable(result, '110092');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (10000));
-
-    } else {
-        setInterval(function() {
-            getCovidShieldAvailability().then(result => {
-                if(result.success) {
-                    isCOVIDSHIELDAvailable(result, '110092');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (10000));
-    }
-
-});
-
-//110093
-getCovidShieldAvailability4().then(result => {
-    if(result.success) {
-        isCOVIDSHIELDAvailable(result, '110093');
-
-        setInterval(function(){
-            getCovidShieldAvailability4().then(result => {
-                if(result.success) {
-                    // console.log("COVID RESPONSE")
-                    // console.log(result)
-                    isCOVIDSHIELDAvailable(result, '110093');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (13000));
-
-    } else {
-        setInterval(function() {
-            getCovidShieldAvailability4().then(result => {
-                if(result.success) {
-                    isCOVIDSHIELDAvailable(result, '110093');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (13000));
-    }
-
-});
-
-//110094
-getCovidShieldAvailability3().then(result => {
-    if(result.success) {
-        isCOVIDSHIELDAvailable(result, '110096');
-
-        setInterval(function() {
-            getCovidShieldAvailability3().then(result => {
-                if(result.success) {
-                    isCOVIDSHIELDAvailable(result, '110096');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (11000));
-
-    } else {
-        setInterval(function() {
-            getCovidShieldAvailability3().then(result => {
-                if(result.success) {
-                    isCOVIDSHIELDAvailable(result, '110096');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (11000));
-    }
-});
-
-//110095
-getCovidShieldAvailability1().then(result => {
-    if(result.success) {
-        isCOVIDSHIELDAvailable(result, '110095');
-
-        setInterval(function(){
-            getCovidShieldAvailability1().then(result => {
-                if(result.success) {
-                    // console.log("COVID RESPONSE")
-                    // console.log(result)
-                    isCOVIDSHIELDAvailable(result, '110095');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (12000));
-
-    } else {
-        setInterval(function() {
-            getCovidShieldAvailability1().then(result => {
-                if(result.success) {
-                    isCOVIDSHIELDAvailable(result, '110095');
-                } else {
-                    // console.log("COVID Error")
-                    // console.log(result.error)
-                }
-            });
-        }, (12000));
-    }
-
-});
-
-//----------------------------Logic to check for the Availability with filter ----------------
+})
 
 function isCOVIDSHIELDAvailable(result, pincode) {
     // console.log('Send SMS')
@@ -282,11 +93,10 @@ function isCOVIDSHIELDAvailable(result, pincode) {
     })
 }
 
-//--------------------------- Get a Call on availablity with pincode -------------------------
-function sendSMSCall(message) {
+function sendSMSCall(pincode) {
     const sendSmsData = {
         mobileNumber: process.env.NOTIFICATION_TO,
-        otp: message
+        otp: pincode
     }
     console.log(sendSmsData);
     sendSms(sendSmsData);
