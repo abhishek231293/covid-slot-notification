@@ -1,13 +1,17 @@
 const request = require('request');
 require('dotenv').config();
-const sendSms = require('./_helper');
+const makeCall = require('./_helper');
 
 let attempt = 1;
-const pincodes = [ '110092', '110093', '110094', '110095', '110096' ];
-const dateToVerify = '16-05-2021';
+const pincodes = [  '110059', '110058', '110060', '110064', '110015' ];
+const dateToVerify = '18-05-2021';
 const age = 18;
 const feeType = 'Free';
 const vaccineType = "COVISHIELD";
+const nextRunTIme = 10000;
+const slot = "09:00AM-11:00AM";
+const beneficiaries = ["44674045451550"];
+const dose = 1;
 
 function getCovidShieldAvailability(pincode) {
     return new Promise((resolve) => {
@@ -49,7 +53,7 @@ pincodes.forEach((pincode)=> {
                         isCOVIDSHIELDAvailable(result, pincode);
                     }
                 });
-            }, (10000));
+            }, (nextRunTIme));
     
         } else {
             setInterval(function() {
@@ -58,7 +62,7 @@ pincodes.forEach((pincode)=> {
                         isCOVIDSHIELDAvailable(result, pincode);
                     }
                 });
-            }, (10000));
+            }, (nextRunTIme));
         }
     
     });
@@ -69,9 +73,20 @@ function isCOVIDSHIELDAvailable(result, pincode) {
         center.sessions.forEach((session)=>{
             if(session.vaccine === vaccineType && center.fee_type === feeType) {
                 if(+session.available_capacity_dose1 && +session.min_age_limit === age) {
-                    sendSMSCall(pincode);
                     console.log(session.vaccine, +session.available_capacity_dose1, +session.min_age_limit)
-                    const message = pincode + ' - COVISHIELD is now Available @ ' + center.name + '. Address: '+ center.address + ' Remaining vaccine: ' + session.available_capacity + ' on ' + session.date + ' for age group '+ session.min_age_limit;
+                    
+                    callNotifier(pincode);
+
+                    /*
+                    * Booking through bot is closed now due to security.
+                    *
+                    bookNow({center_id: center.center_id, session_id: session.session_id}).then((bookingresponse)=>{
+                        console.log('Booking Response: ', bookingresponse)
+                    })
+                    *
+                    */
+
+                    const message = pincode + ' - COVISHIELD is now Available @ ' + center.name + '. Address: '+ center.address + ' Remaining vaccine: ' + session.available_capacity_dose1 + ' on ' + session.date + ' for age group '+ session.min_age_limit;
                     console.log('###############################################################');
                     console.log(message);
                     console.log('###############################################################');
@@ -83,12 +98,45 @@ function isCOVIDSHIELDAvailable(result, pincode) {
     })
 }
 
-function sendSMSCall(pincode) {
+//Booking through bot is now closed due to security in API using captcha.
+function bookNow(details) {
 
-    const sendSmsData = {
+    return new Promise((resolve) => {
+        try {
+            resolve({success: false, msg: "", error: 'no'});
+            request.post({
+                url: 'https://cdn-api.co-vin.in/api/v2/appointment/schedule',
+                form: {
+                    beneficiaries,
+                    captcha: "4XUUy",
+                    center_id: details.center_id,
+                    dose,
+                    session_id: details.session_id,
+                    slot: slot
+                }
+            }, function (err, httpResponse, body) {
+
+                if(body){
+                    try {
+                        resolve({success: true, msg: "", responseData: body });
+                    } catch (e) {
+                        resolve({success: false, msg: "", error: e});
+                    }
+                }
+            });
+        } catch (e) {
+            resolve({success: false, msg: "", error: e});
+        }
+
+    });
+
+}
+
+function callNotifier(pincode) {
+    const data = {
         mobileNumber: process.env.NOTIFICATION_TO,
         otp: pincode
     }
-    console.log(sendSmsData);
-    sendSms(sendSmsData);
+    console.log(data);
+    makeCall(data);
 }
