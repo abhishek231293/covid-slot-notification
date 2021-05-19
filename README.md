@@ -7,11 +7,11 @@
 4. create a .env file and add below details
     PORT=3000
 
-    VOICE_API_KEY=<your key>
-    VOICE_RECEIVER=<ivr received id>
+    VOICE_API_KEY="<your key>"
+    VOICE_RECEIVER="<ivr received id>"
     VOICE_METHOD=dial.click2call
     
-    NOTIFICATION_TO=<Your mobile number to get a call>
+    NOTIFICATION_TO="<Your mobile number to get a call>"
     
 5. run nodemon server.js
 
